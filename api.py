@@ -142,8 +142,14 @@ def process_document_card_v2(input_image: np.ndarray, preloaded_templates_data: 
 
 # --- Função para Conversão de Imagem para Base64 ---
 def image_to_base64(image_np: np.ndarray) -> str:
+    if len(image_np.shape) == 2:
+        image_np = cv2.cvtColor(image_np, cv2.COLOR_GRAY2BGR)
+    elif image_np.shape[2] == 4:
+        image_np = cv2.cvtColor(image_np, cv2.COLOR_RGBA2BGR)
+
     _, buffer = cv2.imencode('.jpg', image_np)
     return base64.b64encode(buffer).decode('utf-8')
+
 
 # --- API Flask ---
 app = Flask(__name__)
