@@ -106,7 +106,7 @@ def find_best_match_template(img_input_gray: np.ndarray, preloaded_templates: li
 
 # --- 4. Função de Processamento de Cartão ---
 def process_document_card_v2(input_image: np.ndarray, preloaded_templates_data: list[dict], orb_detector: cv2.ORB, bf_matcher: cv2.BFMatcher) -> tuple[bool, str, np.ndarray | None]:
-    gray_input = cv2.cvtColor(input_image, cv2.COLOR_BGR2GRAY)
+    gray_for_match = cv2.cvtColor(input_image, cv2.COLOR_BGR2GRAY)
     qr_code = read_qr_code(input_image)
     if not qr_code:
         return False, "Nenhum QR Code encontrado", None
@@ -115,7 +115,9 @@ def process_document_card_v2(input_image: np.ndarray, preloaded_templates_data: 
     if is_blurry_flag:
         return False, "Imagem borrada", None
 
-    best_template_idx, best_img_template, best_kp_template, best_des_template, best_good_matches, H = find_best_match_template(gray_input, preloaded_templates_data, orb_detector, bf_matcher)
+    best_template_idx, best_img_template, best_kp_template, best_des_template, best_good_matches, H = find_best_match_template(
+        gray_for_match, preloaded_templates_data, orb_detector, bf_matcher
+    )
     
     if best_template_idx == -1 or H is None:
         return False, "Falha: Não foi possível encontrar um bom alinhamento com nenhum dos templates.", None
@@ -139,6 +141,7 @@ def process_document_card_v2(input_image: np.ndarray, preloaded_templates_data: 
     corrected_image = cv2.warpPerspective(input_image, M_transform, (w_template, h_template))
 
     return True, qr_code, corrected_image
+
 
 # --- Função para Conversão de Imagem para Base64 ---
 def image_to_base64(image_np: np.ndarray) -> str:
@@ -168,7 +171,9 @@ def process_image():
 
     try:
         response = requests.get(image_url)
-        image_np = np.array(Image.open(BytesIO(response.content)))
+        image_pil = Image.open(BytesIO(response.content)).convert("RGB")
+        image_np = cv2.cvtColor(np.array(image_pil), cv2.COLOR_RGB2BGR)
+
 
         orb_detector = cv2.ORB_create(nfeatures=5000, scaleFactor=1.2, nlevels=8)
         bf_matcher = cv2.BFMatcher(cv2.NORM_HAMMING, crossCheck=False)
