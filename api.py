@@ -148,6 +148,12 @@ def image_to_base64(image_np: np.ndarray) -> str:
 # --- API Flask ---
 app = Flask(__name__)
 
+#Rota de testes básica
+@app.route('/', methods=['GET'])
+def health_check():
+    return jsonify({"status": "API running"}), 200
+
+
 @app.route('/process-image', methods=['POST'])
 def process_image():
     image_url = request.json.get('image_url', None)
