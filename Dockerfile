@@ -1,17 +1,31 @@
-# Use uma imagem oficial do Python como base
+# Base image
 FROM python:3.11-slim
 
-# Define o diretório de trabalho dentro do container
+# Define diretório de trabalho
 WORKDIR /app
 
-# Copia os arquivos do projeto para o container
-COPY . /app
+# Instala dependências do sistema
+RUN apt-get update && apt-get install -y \
+    libgl1 \
+    libglib2.0-0 \
+    libsm6 \
+    libxext6 \
+    libxrender1 \
+    libzbar0 \
+    build-essential \
+    && rm -rf /var/lib/apt/lists/*
 
-# Instala as dependências
+# Copia os arquivos de dependências Python
+COPY requirements.txt .
+
+# Instala dependências Python
 RUN pip install --no-cache-dir -r requirements.txt
 
-# Expõe a porta que o Flask usa
+# Copia o código para o container
+COPY . .
+
+# Expor porta que a API utiliza
 EXPOSE 5000
 
-# Comando para rodar a aplicação
+# Comando para rodar a API
 CMD ["python", "api.py"]
