@@ -167,7 +167,7 @@ def health_check():
 def process_image():
     image_url = request.json.get('image_url', None)
     if not image_url:
-        return jsonify({"success": False, "message": "URL da imagem não fornecida"}), 400
+        return jsonify({"success": False, "message": "URL da imagem não fornecida"}), 200
 
     try:
         response = requests.get(image_url)
@@ -197,13 +197,13 @@ def process_image():
                     })
 
         if not preloaded_templates_data:
-            return jsonify({"success": False, "message": "Nenhum template válido carregado."}), 400
+            return jsonify({"success": False, "message": "Nenhum template válido carregado."}), 200
 
         # Processar a imagem
         success, qr_code, processed_image = process_document_card_v2(image_np, preloaded_templates_data, orb_detector, bf_matcher)
 
         if not success:
-            return jsonify({"success": False, "message": qr_code}), 400
+            return jsonify({"success": False, "message": qr_code}), 200
 
         processed_image_base64 = image_to_base64(processed_image)
 
